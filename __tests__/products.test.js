@@ -34,10 +34,6 @@ const validPut = {
   name: "Edited name",
 };
 
-const notValidPut = {
-  anme: 1234,
-};
-
 beforeAll(async () => {
   await mongoose.connect(process.env.MONGO_TEST_URL);
   // const product = new ProductsModel(validProduct);
