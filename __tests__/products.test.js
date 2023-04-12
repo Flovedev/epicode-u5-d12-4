@@ -85,13 +85,22 @@ describe("Test Products APIs", () => {
     await client.get(`/products/${notValidId}`).expect(404);
   });
 
-  it("Should test that all prices in the response body of GET /products are numbers", async () => {
+  it("Should test that a product's price is a number", async () => {
     const response = await client.get(`/products/${validId}`).expect(200);
-    const prices = response.body.price;
-    const areNumbers = Number.isInteger(prices);
-    console.log(areNumbers);
+    const price = response.body.price;
+    expect(typeof price).toBe("number");
+  });
 
-    expect(areNumbers).toBe(true);
+  it("Should test that GET /products returns 200 and a body with a price greater than 2", async () => {
+    const response = await client.get("/products").expect(200);
+    const price = response.body[0].price;
+    expect(price).toBeGreaterThan(2);
+  });
+
+  it("Should test that product description contains 'Good'", async () => {
+    const response = await client.get(`/products/${validId}`).expect(200);
+    const description = response.body.description;
+    expect(description).toContain("Good");
   });
 
   it("Should test that PUT /products/:id returns 200", async () => {
