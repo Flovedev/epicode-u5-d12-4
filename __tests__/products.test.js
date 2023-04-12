@@ -14,7 +14,12 @@ dotenv.config(); // This command forces .env vars to be loaded into process.env.
 // It will give us back an object (client) that can be used to run http requests on that server
 const client = supertest(server);
 
+let validId = "6436b3e8a9cffa115e35e62c";
+
+const notValidId = "123456123456123456123456";
+
 const validProduct = {
+  _id: validId,
   name: "iPhone",
   description: "Good phone",
   price: 10000,
@@ -25,14 +30,18 @@ const notValidProduct = {
   price: 10000,
 };
 
-let validId = "";
+const validPut = {
+  name: "Edited name",
+};
 
-const notValidId = "123456123456123456123456";
+const notValidPut = {
+  anme: 1234,
+};
 
 beforeAll(async () => {
   await mongoose.connect(process.env.MONGO_TEST_URL);
-  const product = new ProductsModel(validProduct);
-  await product.save();
+  // const product = new ProductsModel(validProduct);
+  // await product.save();
 }); // beforeAll is a Jest hook which will be ran before all tests, usually this is used to connect to db and to do some initial setup like adding some mock data to the db
 
 afterAll(async () => {
@@ -56,7 +65,6 @@ describe("Test Products APIs", () => {
       .send(validProduct)
       .expect(201);
     expect(response.body._id).toBeDefined();
-    let validId = response.bodd._id;
   });
 
   it("Should test that POST /products returns 400 if a not valid product is provided in req.body", async () => {
@@ -77,7 +85,33 @@ describe("Test Products APIs", () => {
     await client.get(`/products/${notValidId}`).expect(404);
   });
 
-  // it("Should test that DELETE /products/:id returns 204", async () => {
-  //   await client.delete(`/products/${validId}`).expect(204);
-  // });
+  it("Should test that all prices in the response body of GET /products are numbers", async () => {
+    const response = await client.get(`/products/${validId}`).expect(200);
+    const prices = response.body.price;
+    const areNumbers = Number.isInteger(prices);
+    console.log(areNumbers);
+
+    expect(areNumbers).toBe(true);
+  });
+
+  it("Should test that PUT /products/:id returns 200", async () => {
+    const response = await client
+      .put(`/products/${validId}`)
+      .send(validPut)
+      .expect(200);
+    expect(response.body._id).toBeDefined();
+    expect(typeof response.body.name).toBe("string");
+  });
+
+  it("Should test that PUT by id /products/:id returns 404 if not valid id is provided in params", async () => {
+    await client.put(`/products/${notValidId}`).expect(404);
+  });
+
+  it("Should test that DELETE /products/:id returns 204", async () => {
+    await client.delete(`/products/${validId}`).expect(204);
+  });
+
+  it("Should test that GET by id /products/:id returns 404 if not valid id is provided in params", async () => {
+    await client.delete(`/products/${notValidId}`).expect(404);
+  });
 });
