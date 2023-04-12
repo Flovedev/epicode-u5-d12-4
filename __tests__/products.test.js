@@ -72,7 +72,7 @@ describe("Test Products APIs", () => {
     console.log(response.body);
   });
 
-  it("Should test that GET bu id /products/:id returns 200 and a body", async () => {
+  it("Should test that GET by id /products/:id returns 200 and a body", async () => {
     const response = await client.get(`/products/${validId}`).expect(200);
     console.log(response.body);
   });
